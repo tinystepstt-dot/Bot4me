@@ -1554,7 +1554,7 @@ const getMenu = () => `
 
 _Use responsibly!_
 
-> Dev: https://t.me/theidledeveloper
+> Dev: https://wa.me/qr/FZ7P7MUYVDFVA1
 `;
 
 async function startBot() {
