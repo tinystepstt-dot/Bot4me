@@ -1,7 +1,7 @@
 {
-  "name": "luca-bot",
+  "name": "SILVER-BOT",
   "version": "2.0.0",
-  "description": "LUCA WhatsApp Bot - Multi-User System",
+  "description": "SILVER WhatsApp Bot - Multi-User System",
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js",
@@ -12,7 +12,7 @@
     "whatsapp",
     "bot"
   ],
-  "author": "TheIdleDeveloper",
+  "author": "SILVER",
   "license": "MIT",
   "dependencies": {
     "@distube/ytdl-core": "^4.16.12",
