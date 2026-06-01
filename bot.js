@@ -2121,14 +2121,15 @@ We hope to see you again soon!`;
       if (antiDeleteEnabled && !message.key.fromMe) {
         const messageId = message.key.id;
         const cacheData = {
-          id: messageId,
-          sender: sender,
-          remoteJid: message.key.remoteJid,
-          text: text,
-          timestamp: Date.now(),
-          message: message.message, // Store full message for media
-          isGroup: isGroup
-        };
+  id: messageId,
+  sender: sender,
+  senderName: message.pushName || "Unknown",
+  remoteJid: message.key.remoteJid,
+  text: text,
+  timestamp: Date.now(),
+  message: message.message,
+  isGroup: isGroup
+};
         
         // Store in cache
         messageCache.set(messageId, cacheData);
