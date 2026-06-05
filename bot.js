@@ -2172,6 +2172,13 @@ try {
   message: message.message,
   isGroup: isGroup
 };
+        console.log("CACHE DEBUG:", {
+    sender,
+    pushName,
+    participant: message.key?.participant,
+    remoteJid: message.key?.remoteJid,
+    fromMe: message.key?.fromMe
+});
         
         // Store in cache
         messageCache.set(messageId, cacheData);
