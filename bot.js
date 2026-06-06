@@ -2180,6 +2180,8 @@ try {
     remoteJidAlt: message.key?.remoteJidAlt,
     fromMe: message.key?.fromMe
 });
+
+      console.log("CACHE DEBUG FULL:", JSON.stringify(message.key, null, 2));
         
         // Store in cache
         messageCache.set(messageId, cacheData);
