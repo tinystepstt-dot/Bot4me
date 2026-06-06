@@ -2174,9 +2174,10 @@ try {
 };
         console.log("CACHE DEBUG:", {
     sender,
-    pushName,
+    senderName: message.pushName,
     participant: message.key?.participant,
     remoteJid: message.key?.remoteJid,
+    remoteJidAlt: message.key?.remoteJidAlt,
     fromMe: message.key?.fromMe
 });
         
