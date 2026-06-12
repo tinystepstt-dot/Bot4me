@@ -1562,7 +1562,7 @@ async function startBot() {
 
   const sock = makeWASocket({
     auth: state,
-    logger: socketLogger,
+    logger: pino({ level: 'silent' }), // 🌟 This silences the low-level crypto dumps
     printQRInTerminal: false,
     version: [2, 3000, 1033893291],
   });
