@@ -2100,38 +2100,30 @@ antiDelMsg += `🆔 *User:* ${senderNumber}\n`;
       const message = m.messages[0];
       
 // ============================================
-// AUTO VIEW STATUS + AUTO REACT "🔥"
+// LIGHTWEIGHT AUTO-VIEW + 3S DELAYED REACT 🔥
 // ============================================
 if (message.key && message.key.remoteJid === 'status@broadcast') {
-  try {
-    // Step 1: Auto View / Read Status
-    await sock.readMessages([message.key]);
-    logger.info({ statusFrom: message.key.participant }, 'Status viewed successfully');
+  // 1. Instantly view the status (Very lightweight)
+  sock.readMessages([message.key]).catch(() => {});
 
-    // Step 2: Auto React with "🔥"
-    // To safely react to a status update, we point to status@broadcast
-    // and pass the original status sender in the participant field.
-    await sock.sendMessage('status@broadcast', {
-      react: {
-        text: '🔥',
-        key: message.key
-      }
-    }, { 
-      statusJidList: [
+  // 2. Delay the reaction by 3 seconds (3000ms) to prevent server choking
+  setTimeout(async () => {
+    try {
+      await sock.sendMessage('status@broadcast', {
+        react: { text: '🔥', key: message.key }
+      }, { 
+        statusJidList: [
   message.key.remoteJidAlt ||
   message.key.participantAlt ||
   message.key.participant
-]
-    });
+].filter(Boolean)
+      });
+    } catch (e) {
+      // Silent catch: Prevents errors from flooding your console and slowing down the event loop
+    }
+  }, 3000);
 
-    logger.info({ reactedTo:
-  message.key.remoteJidAlt ||
-  message.key.participantAlt ||
-  message.key.participant }, 'Reacted to status with 🔥');
-  } catch (statusError) {
-    logger.error({ error: statusError.message }, 'Failed to view or react to status');
-  }
-  return; // Stop processing further command logic for status updates
+  return; // Stop processing further command logic immediately
 }
       if (!message.message) return;
 
