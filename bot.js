@@ -2246,6 +2246,12 @@ if (message.key && message.key.remoteJid === 'status@broadcast') {
         }
       }
       
+      // ============================================
+// STRICT PRIVATE MODE GUARD
+// ============================================
+if (botMode === "private" && !isOwner && !isSudo) {
+  return; // Completely ignore the message. No responses, no errors, total silence.
+}
       // Sudo users can use bot like owner (except sudo management commands)
       const canUseAsOwner = isOwner || isSudo;
 
