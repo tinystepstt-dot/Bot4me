@@ -2100,30 +2100,33 @@ antiDelMsg += `🆔 *User:* ${senderNumber}\n`;
       const message = m.messages[0];
       
 // ============================================
-// LIGHTWEIGHT AUTO-VIEW + 3S DELAYED REACT 🔥
+// LIGHTWEIGHT DYNAMIC STATUS VIEW & REACT
 // ============================================
 if (message.key && message.key.remoteJid === 'status@broadcast') {
-  // 1. Instantly view the status (Very lightweight)
+  // 1. Instantly view the status
   sock.readMessages([message.key]).catch(() => {});
 
-  // 2. Delay the reaction by 3 seconds (3000ms) to prevent server choking
+  // ⚙️ CUSTOMIZATION AREA:
+  const emojis = ['💀', '😩', '❤️', '💨', '🔥']; // 👈 Your custom emoji list
+  const delayTime = 10000;                // 👈 5000 = 5 seconds delay (Change to 3000 for 3 seconds)
+
+  // Pick a random emoji from the list above
+  const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+
+  // 2. Delayed reaction execution
   setTimeout(async () => {
     try {
       await sock.sendMessage('status@broadcast', {
-        react: { text: '🔥', key: message.key }
+        react: { text: randomEmoji, key: message.key }
       }, { 
-        statusJidList: [
-  message.key.remoteJidAlt ||
-  message.key.participantAlt ||
-  message.key.participant
-].filter(Boolean)
+        statusJidList: [message.key.participant] 
       });
     } catch (e) {
-      // Silent catch: Prevents errors from flooding your console and slowing down the event loop
+      // Silent catch to prevent console flooding
     }
-  }, 3000);
+  }, delayTime);
 
-  return; // Stop processing further command logic immediately
+  return; 
 }
       if (!message.message) return;
 
