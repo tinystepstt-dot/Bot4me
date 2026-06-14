@@ -2098,33 +2098,52 @@ antiDelMsg += `🆔 *User:* ${senderNumber}\n`;
   sock.ev.on("messages.upsert", async (m) => {
     try {
       const message = m.messages[0];
-      
 // ============================================
-// LIGHTWEIGHT DYNAMIC STATUS VIEW & REACT
+// ULTRALIGHT QUEUED STATUS VIEW & REACT (NO LAG)
 // ============================================
 if (message.key && message.key.remoteJid === 'status@broadcast') {
-  // 1. Instantly view the status
+  // 1. Instantly view the status (Non-blocking)
   sock.readMessages([message.key]).catch(() => {});
 
-  // ⚙️ CUSTOMIZATION AREA:
-  const emojis = ['💀', '😩', '❤️', '💨', '🔥']; // 👈 Your custom emoji list
-  const delayTime = 10000;                // 👈 5000 = 5 seconds delay (Change to 3000 for 3 seconds)
+  // Initialize status queue if it doesn't exist globally
+  if (!global.statusQueue) {
+    global.statusQueue = [];
+    global.isProcessingStatusQueue = false;
+  }
 
-  // Pick a random emoji from the list above
-  const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+  // Add this status update to the queue line
+  global.statusQueue.push({ key: message.key });
 
-  // 2. Delayed reaction execution
-  setTimeout(async () => {
-    try {
-      await sock.sendMessage('status@broadcast', {
-        react: { text: randomEmoji, key: message.key }
-      }, { 
-        statusJidList: [message.key.participant] 
-      });
-    } catch (e) {
-      // Silent catch to prevent console flooding
+  // Function to process the queue line-by-line safely
+  const processStatusQueue = async () => {
+    if (global.isProcessingStatusQueue || global.statusQueue.length === 0) return;
+    global.isProcessingStatusQueue = true;
+
+    while (global.statusQueue.length > 0) {
+      const currentItem = global.statusQueue.shift(); // Get the next status in line
+      
+      try {
+        const emojis = ['💀', '😩', '❤️', '💨', '🔥'];
+        const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+
+        await sock.sendMessage('status@broadcast', {
+          react: { text: randomEmoji, key: currentItem.key }
+        }, { 
+          statusJidList: [currentItem.key.participant] 
+        });
+      } catch (e) {
+        // Silent catch
+      }
+
+      // Safe breathing room: Wait 3 seconds (3000ms) before processing the NEXT status reaction
+      await new Promise(resolve => setTimeout(resolve, 3000));
     }
-  }, delayTime);
+
+    global.isProcessingStatusQueue = false;
+  };
+
+  // Trigger queue execution
+  processStatusQueue();
 
   return; 
 }
