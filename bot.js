@@ -586,22 +586,24 @@ const pollAnonymousMessages = async (sock) => {
 
     try {
       const response = await axios.get(`${ANONYMOUS_WEB_URL}/api/messages/poll/${sessionId}`);
+      
+      // Safety Check: block execution if response or messages array is invalid
+      if (!response.data || !Array.isArray(response.data.messages)) {
+        continue; 
+      }
+
       const { messages } = response.data;
 
       for (const msg of messages) {
-        // Better formatted anonymous message with styling
+        // Guard check to make sure individual message contents exist
+        if (!msg || !msg.message) continue;
+
         await sock.sendMessage(session.groupJid, {
-          text: `┌─────────────────┐
-  *ANON USER #${msg.number}*
-└─────────────────┘
-
-_${msg.message}_
-
-───────────`
+          text: `┌─────────────────┐\n  *ANON USER #${msg.number || 1}*\n└─────────────────┘\n\n_${msg.message}_\n\n───────────`
         });
 
-        session.messageCount = msg.number;
-        session.lastActivity = Date.now(); // Update last activity on message
+        session.messageCount = msg.number || session.messageCount + 1;
+        session.lastActivity = Date.now();
       }
     } catch (error) {
       logger.error({ error: error.message, sessionId }, 'Failed to poll anonymous messages');
