@@ -3912,10 +3912,15 @@ if (command === "vv" && canUseBot) {
               targetJid = `${num}@s.whatsapp.net`;
             }
           }
+
+          // DM Fallback: If still no targetJid, and it's NOT a group chat, target the DM partner
+          if (!targetJid && !message.key.remoteJid.endsWith('@g.us')) {
+            targetJid = normalizeJid(message.key.remoteJid);
+          }
           
           if (!targetJid) {
             await sock.sendMessage(message.key.remoteJid, {
-              text: "❌ Reply to a message, mention someone, or provide a number.\n\nUsage:\n• Reply to message with .getpp\n• .getpp @user\n• .getpp 2348012345678",
+              text: "❌ Reply to a message, mention someone, or provide a number.\n\nUsage:\n• Reply to message with 'getpp\n• 'getpp @user\n• 'getpp 2348012345678",
             });
             return;
           }
@@ -3923,12 +3928,15 @@ if (command === "vv" && canUseBot) {
           try {
             let ppUrl = null;
             try {
+              // Try fetching full high-resolution image first
               ppUrl = await sock.profilePictureUrl(targetJid, "image");
             } catch (err1) {
-              // Try without quality parameter
               try {
-                ppUrl = await sock.profilePictureUrl(targetJid);
-              } catch (err2) {}
+                // Privacy Fallback: Try fetching the low-resolution preview image
+                ppUrl = await sock.profilePictureUrl(targetJid, "preview");
+              } catch (err2) {
+                logger.error({ error: err2.message }, 'Failed fallback preview fetch');
+              }
             }
 
             if (ppUrl) {
@@ -3943,13 +3951,13 @@ if (command === "vv" && canUseBot) {
               });
             } else {
               await sock.sendMessage(message.key.remoteJid, {
-                text: "❌ Profile picture unavailable or hidden.",
+                text: "❌ Profile picture unavailable or hidden by privacy settings.",
               });
             }
           } catch (err) {
             logger.error({ error: err.message }, 'Get PP error');
             await sock.sendMessage(message.key.remoteJid, {
-              text: "❌ Could not fetch profile picture. User may have privacy settings enabled.",
+              text: "❌ Could not fetch profile picture. An unexpected error occurred.",
             });
           }
           return;
